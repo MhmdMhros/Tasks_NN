@@ -1,3 +1,5 @@
+import numpy as np
+
 from algorithms import *
 from helper_functions import *
 from plotting import *
@@ -18,8 +20,21 @@ def train_model(function_type, num_layers, num_neurons, eta, m, isBias):
     for column in columns_to_scale:
         fillna_and_scale_and_replace(X, column, -1, 1)
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.4, shuffle=True, random_state=10)
-
     if function_type == 'sigmoid':
-        print(function_type)
+        input_size = 5
+        num_neurons = [int(num) for num in num_neurons.split(",")]
+        print(num_neurons)
+        output_size = 3
+        # print(X_train.values)
+        # print(np.array(y_train).reshape(-1, 1))
+        hidden_layers = num_neurons
+        # print(layers)
+        # create a Multilayer Perceptron with one hidden layer
+        mlp = MLP(input_size, hidden_layers, output_size)
+        # train network
+        mlp.train(X_train.values, np.array(y_train).reshape(-1, 1), m, eta)
+
+
+
     else:
         print(function_type)

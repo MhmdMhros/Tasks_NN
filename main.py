@@ -7,7 +7,7 @@ window.geometry("600x500")
 
 function_type = StringVar()
 num_layers = IntVar()
-num_neurons = IntVar()
+num_neurons = StringVar()
 eta = DoubleVar()
 m = IntVar()
 isBias = IntVar()
@@ -27,9 +27,11 @@ option1_radio = Radiobutton(user_input_frame, text="Sigmoid", variable=function_
 # choice 2
 option2_radio = Radiobutton(user_input_frame, text="Tanh", variable=function_type, value="tanh")
 # number of hidden layers
+num_layers.set(2)
 num_layers_label = Label(user_input_frame, text="#Layers", font=('Arial', 10))
 num_layers_entry = Entry(user_input_frame, textvariable=num_layers, width=50)
 # number of neurons in each hidden layer
+num_neurons.set("2,3")
 num_neurons_label = Label(user_input_frame, text="#Neurons", font=('Arial', 10))
 num_neurons_entry = Entry(user_input_frame, textvariable=num_neurons, width=50)
 # learning rate (eta)

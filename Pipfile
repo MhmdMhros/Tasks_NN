@@ -8,6 +8,12 @@ numpy = "*"
 pandas = "*"
 openpyxl = "*"
 scikit-learn = "*"
+pyttsx3 = "*"
+gtts = "*"
+sumy = "*"
+keras = "*"
+preprocess = "*"
+opencv-python = "*"
 
 [dev-packages]
 
