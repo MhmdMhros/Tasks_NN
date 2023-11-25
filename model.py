@@ -33,6 +33,17 @@ def train_model(function_type, num_layers, num_neurons, eta, m, isBias):
         mlp = MLP(input_size, hidden_layers, output_size)
         # train network
         mlp.train(X_train.values, np.array(y_train).reshape(-1, 1), m, eta)
+        output = mlp.forward_propagate(X_test.values)
+        print(X_test.iloc[0])
+        print(y_test.iloc[0])
+        # Define label mapping
+        label_mapping = {0: 'BOMBAY', 1: 'CALI', 2: 'SIRA'}
+
+        print(output[0])
+        # Replace "1" with corresponding labels in each inner list
+        result_labels = [label_mapping[np.argmax(inner_list)] for inner_list in output]
+
+        print(result_labels[0])
 
 
 
