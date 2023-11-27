@@ -1,213 +1,108 @@
 import numpy as np
-import random
+from sklearn.metrics import accuracy_score
+
 
 class MLP(object):
     """A Multilayer Perceptron class.
     """
-
-    def __init__(self, num_inputs=2, hidden_layers=[3, 3], num_outputs=1):
-        """Constructor for the MLP. Takes the number of inputs,
-            a variable number of hidden layers, and number of outputs
-
-        Args:
-            num_inputs (int): Number of inputs
-            hidden_layers (list): A list of ints for the hidden layers
-            num_outputs (int): Number of outputs
-        """
-
+    def __init__(self, num_inputs, num_outputs, inputs, hidden_layers, targets, function_type, learning_rate, epochs, isBias):
         self.num_inputs = num_inputs
-        self.hidden_layers = hidden_layers
         self.num_outputs = num_outputs
+        self.inputs = inputs
+        self.hidden_layers = len(hidden_layers)
+        self.targets = targets
+        self.function_type = function_type
+        self.learning_rate = float(learning_rate)
+        self.epochs = epochs
+        self.isBias = isBias
 
-        # create a generic representation of the layers
-        layers = [num_inputs] + hidden_layers + [num_outputs]
-        # [5, 2 , 3 ,3]
-
-        # create random connection weights for the layers
         weights = []
-        for i in range(len(layers) - 1):
-            w = np.random.rand(layers[i], layers[i + 1])
-            weights.append(w)
+        biases = []
+        for i in range(len(hidden_layers)):
+            if i == 0:
+                weights.append(np.random.rand(hidden_layers[i], len(self.inputs[0])))
+                biases.append(np.random.rand(hidden_layers[i], 1))
+            else:
+                weights.append(np.random.rand(hidden_layers[i], hidden_layers[i - 1]))
+                biases.append(np.random.rand(hidden_layers[i], 1))
+        if len(hidden_layers) == 0:
+            weights.append(np.random.rand(self.num_outputs, self.num_inputs))
+            biases.append(np.random.rand(self.num_outputs, 1))
+        else:
+            weights.append(np.random.rand(self.num_outputs, hidden_layers[-1]))
+            biases.append(np.random.rand(self.num_outputs, 1))
+        if(self.isBias == 0):
+            for i in range(len(biases)):
+                biases[i] = np.zeros(biases[i].shape)
         self.weights = weights
-
-        # save derivatives per layer
-        derivatives = []
-        for i in range(len(layers) - 1):
-            d = np.zeros((layers[i], layers[i + 1]))
-            derivatives.append(d)
-        self.derivatives = derivatives
-
-        # save activations per layer
-        activations = []
-        for i in range(len(layers)):
-            a = np.zeros(layers[i])
-            activations.append(a)
-        self.activations = activations
-
-
-    def forward_propagate(self, inputs):
-        """Computes forward propagation of the network based on input signals.
-
-        Args:
-            inputs (ndarray): Input signals
-        Returns:
-            activations (ndarray): Output values
-        """
-
-        # the input layer activation is just the input itself
-        activations = inputs
-
-        # save the activations for backpropogation
-        self.activations[0] = activations
-
-        # iterate through the network layers
-        for i, w in enumerate(self.weights):
-            # calculate matrix multiplication between previous activation and weight matrix
-            net_inputs = np.dot(activations, w)
-
-            # apply sigmoid activation function
-            activations = self._sigmoid(net_inputs)
-
-            # save the activations for backpropogation
-            self.activations[i + 1] = activations
-
-        # return output layer activation
-        return activations
-
-
-    def back_propagate(self, error):
-        """Backpropogates an error signal.
-        Args:
-            error (ndarray): The error to backprop.
-        Returns:
-            error (ndarray): The final error of the input
-        """
-
-        # iterate backwards through the network layers
-        for i in reversed(range(len(self.derivatives))):
-
-            # get activation for previous layer
-            activations = self.activations[i+1]
-
-            # apply sigmoid derivative function
-            delta = error * self._sigmoid_derivative(activations)
-
-            # reshape delta as to have it as a 2d array
-            delta_re = delta.reshape(delta.shape[0], -1).T
-
-            # get activations for current layer
-            current_activations = self.activations[i]
-
-            # reshape activations as to have them as a 2d column matrix
-            current_activations = current_activations.reshape(current_activations.shape[0],-1)
-
-            # save derivative after applying matrix multiplication
-            self.derivatives[i] = np.dot(current_activations, delta_re)
-
-            # backpropogate the next error
-            error = np.dot(delta, self.weights[i].T)
-
-
-    def train(self, inputs, targets, epochs, learning_rate):
-        """Trains model running forward prop and backprop
-        Args:
-            inputs (ndarray): X
-            targets (ndarray): Y
-            epochs (int): Num. epochs we want to train the network for
-            learning_rate (float): Step to apply to gradient descent
-        """
-        # now enter the training loop
-        for i in range(epochs):
-            sum_errors = 0
-
-            # iterate through all the training data
-            for j, input in enumerate(inputs):
-                target = targets[j]
-
-                # activate the network!
-                output = self.forward_propagate(input)
-
-                error = target - output
-
-                self.back_propagate(error)
-
-                # now perform gradient descent on the derivatives
-                # (this will update the weights
-                self.gradient_descent(learning_rate)
-
-                # keep track of the MSE for reporting later
-                sum_errors += self._mse(target, output)
-
-            # Epoch complete, report the training error
-            print("Error: {} at epoch {}".format(sum_errors / len(inputs), i+1))
-
-        print("Training complete!")
-        print("=====")
-
-
-    def gradient_descent(self, learningRate=1):
-        """Learns by descending the gradient
-        Args:
-            learningRate (float): How fast to learn.
-        """
-        # update the weights by stepping down the gradient
-        for i in range(len(self.weights)):
-            weights = self.weights[i]
-            derivatives = self.derivatives[i]
-            weights += derivatives * learningRate
-
-
-    def _sigmoid(self, x):
-        """Sigmoid activation function
-        Args:
-            x (float): Value to be processed
-        Returns:
-            y (float): Output
-        """
-
+        self.biases = biases
+    def forward_propagate(self, inputs, activation_function):
+        net = []
+        net.append(inputs.reshape(len(inputs), 1))
+        for i in range(self.hidden_layers + 1):
+            if i == 0:
+                net.append(activation_function(
+                    np.dot(self.weights[i], inputs.reshape(len(inputs), 1)) + self.biases[i]))
+            else:
+                net.append(activation_function(np.dot(self.weights[i], net[i]) + self.biases[i]))
+        return net
+    def back_propagate(self, target, activationFunctionDerivative, net):
+        sigmas = []
+        expected_output = np.zeros((self.num_outputs, 1))
+        for i in range(self.num_outputs):
+            if i == target:
+                expected_output[i] = 1
+            else:
+                expected_output[i] = 0
+        sigmas.append((expected_output - net[-1]) * activationFunctionDerivative(net[-1]))
+        for i in range(self.hidden_layers):
+            sigmas.append(np.dot(self.weights[-i - 1].T, sigmas[i]) * activationFunctionDerivative(net[-i - 2]))
+        return sigmas
+    def train(self):
+        activation_function, activation_function_derivative = self.get_activation_function(self.function_type)
+        for i in range(self.epochs):
+            for j in range(len(self.inputs)):
+                net = self.forward_propagate(self.inputs[j], activation_function)
+                sigmas = self.back_propagate(self.targets[j], activation_function_derivative, net)
+                self.weights, self.biases = self.update_weights(sigmas, net)
+        return self.weights, self.biases, self.training_accuracy(activation_function)*100
+    def update_weights(self, sigmas, layer_output):
+        for i in range(self.hidden_layers + 1):
+            self.weights[i] += self.learning_rate * np.dot(sigmas[self.hidden_layers - i], layer_output[i].T)
+            if self.isBias == 1:
+                self.biases[i] += self.learning_rate * sigmas[self.hidden_layers - i]
+        return self.weights, self.biases
+    def sigmoid(self, x):
         y = 1.0 / (1 + np.exp(-x))
         return y
-
-
-    def _sigmoid_derivative(self, x):
-        """Sigmoid derivative function
-        Args:
-            x (float): Value to be processed
-        Returns:
-            y (float): Output
-        """
+    def sigmoid_derivative(self, x):
         return x * (1.0 - x)
+    def tanh(self, x):
+        return np.tanh(x)
+    def tanh_derivative(self, x):
+        return 1 - x ** 2
+    def get_activation_function(self, function_type):
+        if function_type == "sigmoid":
+            return self.sigmoid, self.sigmoid_derivative
+        else:
+            return self.tanh, self.tanh_derivative
+    def training_accuracy(self, activation_function):
+        predictions = []
+        predictions = self.accuracy(self.inputs, activation_function)
+        accuracy = accuracy_score(self.targets, predictions)
+        return accuracy
+    def testing_accuracy(self, activation_function, inputs, outputs):
+        if activation_function != self.sigmoid and activation_function != self.tanh:
+            activation_function, activation_function_derivative = self.get_activation_function(activation_function)
+        predictions = []
+        predictions = self.accuracy(inputs, activation_function)
+        accuracy = accuracy_score(outputs, predictions)
+        return accuracy
+    def accuracy(self, inputs, activation_function):
+        pred = []
+        for i in range(len(inputs)):
+            layer_output = self.forward_propagate(inputs[i], activation_function)
+            predicted_class = np.argmax(layer_output[-1])
+            pred.append(predicted_class)
+        return pred
 
-
-    def _mse(self, target, output):
-        """Mean Squared Error loss function
-        Args:
-            target (ndarray): The ground trut
-            output (ndarray): The predicted values
-        Returns:
-            (float): Output
-        """
-        return np.average((target - output) ** 2)
-
-
-
-# # create a dataset to train a network for the sum operation
-# items = np.array([[random.random()/2 for _ in range(2)] for _ in range(1000)])
-# targets = np.array([[i[0] + i[1]] for i in items])
-# print(items)
-# print(targets)
-# # create a Multilayer Perceptron with one hidden layer
-# mlp = MLP(2, [5], 1)
-#
-# # train network
-# mlp.train(items, targets, 50, 0.1)
-#
-# # create dummy data
-# input = np.array([0.3, 0.1])
-# target = np.array([0.4])
-#
-# # get a prediction
-# output = mlp.forward_propagate(input)
-#
-# print()
-# print("Our network believes that {} + {} is equal to {}".format(input[0], input[1],output[0]))

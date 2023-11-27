@@ -11,11 +11,8 @@ num_neurons = StringVar()
 eta = DoubleVar()
 m = IntVar()
 isBias = IntVar()
-
-
 def calculate_operation():
-    train_model(function_type.get(), num_layers.get(), num_neurons.get(), eta.get(), m.get(), isBias.get())
-
+    train_test_model(function_type.get(), num_layers.get(), num_neurons.get(), eta.get(), m.get(), isBias.get())
 
 user_input_frame = Frame(window, bg='lightblue')
 # ================= A_Function_Choice ==================
@@ -31,13 +28,15 @@ num_layers.set(2)
 num_layers_label = Label(user_input_frame, text="#Layers", font=('Arial', 10))
 num_layers_entry = Entry(user_input_frame, textvariable=num_layers, width=50)
 # number of neurons in each hidden layer
-num_neurons.set("2,3")
+num_neurons.set("3,3")
 num_neurons_label = Label(user_input_frame, text="#Neurons", font=('Arial', 10))
 num_neurons_entry = Entry(user_input_frame, textvariable=num_neurons, width=50)
 # learning rate (eta)
+eta.set(0.01)
 eta_label = Label(user_input_frame, text="Learning rate (eta)", font=('Arial', 10))
 eta_entry = Entry(user_input_frame, textvariable=eta, width=50)
 # number of epochs (m)
+m.set(100)
 m_label = Label(user_input_frame, text="#Epochs (m)", font=('Arial', 10))
 m_entry = Entry(user_input_frame, textvariable=m, width=50)
 # bias check (exist or not exist 1 or 0)
