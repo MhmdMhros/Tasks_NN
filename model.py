@@ -1,5 +1,4 @@
-import numpy as np
-from algorithms import *
+from mlp_algorithm import *
 from preprocessing import *
 def train_test_model(function_type, num_layers, num_neurons, eta, m, isBias):
     X_train, Y_train, X_test, Y_test = Preprocessing(filepath='data//Dry_Bean_Dataset.xlsx')
