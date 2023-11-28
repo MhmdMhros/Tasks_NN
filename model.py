@@ -15,4 +15,4 @@ def train_test_model(function_type, num_layers, num_neurons, eta, m, isBias):
     print("Train Accuracy = ", train_accuracy, "%")
     test_accuracy = mlp.testing_accuracy(function_type, X_test, Y_test)*100
     print("Test Accuracy = ", test_accuracy, "%")
-
+    print("Confusion Matrix List = ", mlp.calculate_confusion_matrix(function_type, X_test, Y_test))

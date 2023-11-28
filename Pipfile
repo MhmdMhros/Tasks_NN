@@ -14,6 +14,7 @@ sumy = "*"
 keras = "*"
 preprocess = "*"
 opencv-python = "*"
+matplotlib = "*"
 
 [dev-packages]
 
