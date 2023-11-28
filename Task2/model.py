@@ -1,7 +1,7 @@
 from mlp_algorithm import *
 from preprocessing import *
 def train_test_model(function_type, num_layers, num_neurons, eta, m, isBias):
-    X_train, Y_train, X_test, Y_test = Preprocessing(filepath='data//Dry_Bean_Dataset.xlsx')
+    X_train, Y_train, X_test, Y_test = Preprocessing(filepath='..//data//Dry_Bean_Dataset.xlsx')
     input_size = 5
     num_neurons = [int(num) for num in num_neurons.split(",")]
     output_size = 3

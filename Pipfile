@@ -15,6 +15,7 @@ keras = "*"
 preprocess = "*"
 opencv-python = "*"
 matplotlib = "*"
+seaborn = "*"
 
 [dev-packages]
 

@@ -18,7 +18,7 @@ def scale_and_replace(df, column, a, b):
     # Assign the scaled and replaced values back to the DataFrame
     df[column] = scaled_values.flatten()
 
-def Preprocessing(filepath = 'data//Dry_Bean_Dataset.xlsx'):
+def Preprocessing(filepath = '..//data//Dry_Bean_Dataset.xlsx'):
     # Loading data
     data = pd.read_excel(filepath)
     target_map = {'BOMBAY': 0, 'CALI': 1, 'SIRA': 2}
