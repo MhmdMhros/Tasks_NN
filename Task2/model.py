@@ -5,9 +5,9 @@ def train_test_model(function_type, num_layers, num_neurons, eta, m, isBias):
     input_size = 5
     num_neurons = [int(num) for num in num_neurons.split(",")]
     output_size = 3
-    hidden_layers = num_neurons
+    num_hidden_layer = num_neurons
     # create a Multilayer Perceptron with one hidden layer
-    mlp = MLP(input_size, output_size, X_train, hidden_layers, Y_train, function_type, eta, m, isBias)
+    mlp = MLP(input_size, output_size, X_train, num_hidden_layer, Y_train, function_type, eta, m, isBias)
     # train network
     weights, biases, train_accuracy = mlp.train()
     print('Weights = ', weights)

@@ -6,22 +6,25 @@ import matplotlib.pyplot as plt
 class MLP(object):
     """A Multilayer Perceptron class.
     """
-    def __init__(self, num_inputs, num_outputs, inputs, hidden_layers, targets, function_type, learning_rate, epochs, isBias):
+    def __init__(self, num_inputs, num_outputs, inputs, num_neurons, targets, function_type, learning_rate, epochs, isBias):
         self.num_inputs = num_inputs
         self.num_outputs = num_outputs
         self.inputs = inputs
-        self.hidden_layers = len(hidden_layers)
+        self.hidden_layers = len(num_neurons)
         self.targets = targets
         self.function_type = function_type
         self.learning_rate = float(learning_rate)
         self.epochs = epochs
         self.isBias = isBias
         layers = []
-        if (hidden_layers == [0]):
+        # print(inputs)
+        if (num_neurons == [0]):
             layers = [self.num_inputs] + [self.num_outputs]
+            # [5,3]
             self.hidden_layers = 0
         else:
-            layers = [self.num_inputs] + hidden_layers + [self.num_outputs]
+            layers = [self.num_inputs] + num_neurons + [self.num_outputs]
+            # [5,3,3,3]
         weights = []
         biases = []
         for i in range(len(layers) - 1):
@@ -36,21 +39,17 @@ class MLP(object):
         net = []
         net.append(inputs.reshape(len(inputs), 1))
         for i in range(self.hidden_layers + 1):
-            if i == 0:
-                net.append(activation_function(
-                    np.dot(self.weights[i], inputs.reshape(len(inputs), 1)) + self.biases[i]))
-            else:
-                net.append(activation_function(np.dot(self.weights[i], net[i]) + self.biases[i]))
+            net.append(activation_function(np.dot(self.weights[i], net[i]) + self.biases[i]))
         return net
     def back_propagate(self, target, activation_function_derivative, net):
         sigmas = []
-        expected_output = np.zeros((self.num_outputs, 1))
+        output = np.zeros((self.num_outputs, 1))
         for i in range(self.num_outputs):
             if i == target:
-                expected_output[i] = 1
+                output[i] = 1
             else:
-                expected_output[i] = 0
-        sigmas.append((expected_output - net[-1]) * activation_function_derivative(net[-1]))
+                output[i] = 0
+        sigmas.append((output - net[-1]) * activation_function_derivative(net[-1]))
         for i in range(self.hidden_layers):
             sigmas.append(np.dot(self.weights[-i - 1].T, sigmas[i]) * activation_function_derivative(net[-i - 2]))
         return sigmas
@@ -84,17 +83,17 @@ class MLP(object):
             return self.tanh, self.tanh_derivative
     def training_accuracy(self, activation_function):
         predictions = []
-        predictions = self.accuracy(self.inputs, activation_function)
+        predictions = self.predict(self.inputs, activation_function)
         accuracy = accuracy_score(self.targets, predictions)
         return accuracy
     def testing_accuracy(self, activation_function, inputs, outputs):
         if activation_function != self.sigmoid and activation_function != self.tanh:
             activation_function, activation_function_derivative = self.get_activation_function(activation_function)
         predictions = []
-        predictions = self.accuracy(inputs, activation_function)
+        predictions = self.predict(inputs, activation_function)
         accuracy = accuracy_score(outputs, predictions)
         return accuracy
-    def accuracy(self, inputs, activation_function):
+    def predict(self, inputs, activation_function):
         pred = []
         for i in range(len(inputs)):
             layer_output = self.forward_propagate(inputs[i], activation_function)
