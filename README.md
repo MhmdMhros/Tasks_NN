@@ -1,3 +1,3 @@
 # Tasks_NN
 
-please sheko solve error of task1 😍👀
+Nice work ya regala 😍👀
