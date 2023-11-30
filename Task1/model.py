@@ -13,16 +13,14 @@ def train_model(algo_type, feature1, feature2, class1, class2, eta, m, mse, isBi
     class_name_to_target = {c1: -1, c2: 1}
     # Loading data
     data = pd.read_excel('..//data//Dry_Bean_Dataset.xlsx')
-    print(data)
     # Fill the nan values with mean value of a specific target class
     # print('Before:', data.iloc[:5, feature2 - 1]) # for f2 = 4
-    mean_value = data[data['Class'] == c1].mean()
-    data.iloc[:, feature1 - 1].fillna(mean_value[feature1 - 1], inplace=True)
-    data.iloc[:, feature2 - 1].fillna(mean_value[feature2 - 1], inplace=True)
-
-    mean_value = data[data['Class'] == c2].mean()
-    data.iloc[:, feature1 - 1].fillna(mean_value[feature1 - 1], inplace=True)
-    data.iloc[:, feature2 - 1].fillna(mean_value[feature2 - 1], inplace=True)
+    class_means = data.groupby('Class').mean()
+    for class_name in class_means.index:
+        class_data = data[data['Class'] == class_name]
+        nan_indices = class_data.isnull().any(axis=1)
+        nan_rows = class_data[nan_indices]
+        data.loc[nan_rows.index] = nan_rows.fillna(class_means.loc[class_name])
     # print('After', data.iloc[:5, feature2 - 1])
 
     # Only take rows that have targets of class 1 or 2
